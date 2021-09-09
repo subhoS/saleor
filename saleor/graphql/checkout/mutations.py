@@ -41,7 +41,6 @@ from ...product.models import ProductChannelListing
 from ...shipping import models as shipping_models
 from ...warehouse import models as warehouse_models
 from ...warehouse.availability import check_stock_quantity_bulk
-from ...warehouse.reservations import reserve_stocks
 from ..account.i18n import I18nMixin
 from ..account.types import AddressInput
 from ..channel.utils import clean_channel
