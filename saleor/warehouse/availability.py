@@ -8,6 +8,7 @@ from ..core.exceptions import InsufficientStock, InsufficientStockData
 from .models import Reservation, Stock, StockQuerySet
 
 if TYPE_CHECKING:
+    from ..checkout.fetch import CheckoutLineInfo
     from ..checkout.models import CheckoutLine
     from ..product.models import Product, ProductVariant
 
@@ -156,14 +157,14 @@ def is_product_in_stock(
 
 
 def get_reserved_quantity(
-    stocks: StockQuerySet, current_checkout_lines: Optional[List["CheckoutLine"]] = None
+    stocks: StockQuerySet, lines: Optional[List["CheckoutLine"]] = None
 ) -> int:
     result = (
         Reservation.objects.filter(
             stock__in=stocks,
         )
         .not_expired()
-        .exclude_checkout_lines(current_checkout_lines)
+        .exclude_checkout_lines(lines)
         .aggregate(
             quantity_reserved=Coalesce(Sum("quantity_reserved"), 0),
         )
@@ -174,7 +175,7 @@ def get_reserved_quantity(
 
 def get_reserved_quantity_bulk(
     stocks: Iterable[Stock],
-    current_checkout_lines: Optional[List["CheckoutLineInfo"]] = None,
+    lines: List["CheckoutLineInfo"],
 ) -> Dict[int, int]:
     reservations: Dict[int, int] = defaultdict(int)
     if not stocks:
