@@ -106,7 +106,11 @@ def test_allocate_stock_with_reservations(
 
     line_data = OrderLineData(line=order_line, variant=order_line.variant, quantity=3)
     allocate_stocks(
-        [line_data], COUNTRY_CODE, channel_USD.slug, manager=get_plugins_manager()
+        [line_data],
+        COUNTRY_CODE,
+        channel_USD.slug,
+        manager=get_plugins_manager(),
+        check_reservations=True,
     )
 
     allocations = Allocation.objects.filter(order_line=order_line, stock__in=stocks)
@@ -127,7 +131,11 @@ def test_allocate_stock_insufficient_stock_due_to_reservations(
 
     with pytest.raises(InsufficientStock):
         allocate_stocks(
-            [line_data], COUNTRY_CODE, channel_USD.slug, manager=get_plugins_manager()
+            [line_data],
+            COUNTRY_CODE,
+            channel_USD.slug,
+            manager=get_plugins_manager(),
+            check_reservations=True,
         )
 
     assert not Allocation.objects.exists()

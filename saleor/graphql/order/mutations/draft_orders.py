@@ -20,6 +20,7 @@ from ....order.utils import (
     update_order_prices,
 )
 from ....warehouse.management import allocate_stocks
+from ....warehouse.reservations import is_reservation_enabled
 from ...account.i18n import I18nMixin
 from ...account.types import AddressInput
 from ...channel.types import Channel
@@ -440,7 +441,15 @@ class DraftOrderComplete(BaseMutation):
                     line=line, quantity=line.quantity, variant=line.variant
                 )
                 try:
-                    allocate_stocks([line_data], country, order.channel.slug, manager)
+                    allocate_stocks(
+                        [line_data],
+                        country,
+                        order.channel.slug,
+                        manager,
+                        check_reservations=is_reservation_enabled(
+                            info.context.site.settings
+                        ),
+                    )
                 except InsufficientStock as exc:
                     errors = prepare_insufficient_stock_order_validation_errors(exc)
                     raise ValidationError({"lines": errors})

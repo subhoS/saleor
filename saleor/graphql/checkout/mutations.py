@@ -41,7 +41,7 @@ from ...product.models import ProductChannelListing
 from ...shipping import models as shipping_models
 from ...warehouse import models as warehouse_models
 from ...warehouse.availability import check_stock_quantity_bulk
-from ...warehouse.reservations import get_reservation_length
+from ...warehouse.reservations import get_reservation_length, is_reservation_enabled
 from ..account.i18n import I18nMixin
 from ..account.types import AddressInput
 from ..channel.utils import clean_channel
@@ -316,7 +316,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             quantities,
             country,
             channel.slug,
-            check_reservations=get_reservation_length(request),
+            check_reservations=is_reservation_enabled(request.site.settings),
         )
         return variants, quantities
 
@@ -486,7 +486,7 @@ class CheckoutLinesAdd(BaseMutation):
             country,
             channel_slug,
             existing_lines=lines,
-            check_reservations=get_reservation_length(request),
+            check_reservations=is_reservation_enabled(request.site.settings),
         )
 
     @classmethod
@@ -635,7 +635,7 @@ class CheckoutLinesUpdate(CheckoutLinesAdd):
             allow_zero_quantity=True,
             existing_lines=lines,
             replace=True,
-            check_reservations=get_reservation_length(request),
+            check_reservations=is_reservation_enabled(request.site.settings),
         )
 
     @classmethod
@@ -856,7 +856,7 @@ class CheckoutShippingAddressUpdate(BaseMutation, I18nMixin):
             channel_slug,
             replace=True,
             existing_lines=lines,
-            check_reservations=get_reservation_length(request),
+            check_reservations=is_reservation_enabled(request.site.settings),
         )
 
     @classmethod

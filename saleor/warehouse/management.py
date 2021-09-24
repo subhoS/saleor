@@ -12,6 +12,7 @@ from ..order import OrderLineData
 from ..plugins.manager import PluginsManager
 from ..product.models import ProductVariant
 from .models import Allocation, Reservation, Stock, Warehouse
+from .reservations import is_reservation_enabled
 
 if TYPE_CHECKING:
     from ..order.models import Order, OrderLine
@@ -27,6 +28,7 @@ def allocate_stocks(
     channel_slug: str,
     manager: PluginsManager,
     additional_filter_lookup: Optional[Dict[str, Any]] = None,
+    check_reservations: bool = False,
     checkout_lines: Optional[Iterable["CheckoutLine"]] = None,
 ):
     """Allocate stocks for given `order_lines` in given country.
@@ -59,22 +61,24 @@ def allocate_stocks(
     )
     stocks_id = [stock.pop("id") for stock in stocks]
 
-    quantity_reservation = (
-        Reservation.objects.filter(
-            stock_id__in=stocks_id,
-        )
-        .not_expired()
-        .exclude_checkout_lines(checkout_lines or [])
-        .values("stock")
-        .annotate(
-            quantity_reserved=Coalesce(Sum("quantity_reserved"), 0),
-        )
-    )  # type: ignore
     quantity_reservation_for_stocks: Dict = defaultdict(int)
-    for reservation in quantity_reservation:
-        quantity_reservation_for_stocks[reservation["stock"]] += reservation[
-            "quantity_reserved"
-        ]
+
+    if check_reservations:
+        quantity_reservation = (
+            Reservation.objects.filter(
+                stock_id__in=stocks_id,
+            )
+            .not_expired()
+            .exclude_checkout_lines(checkout_lines or [])
+            .values("stock")
+            .annotate(
+                quantity_reserved=Coalesce(Sum("quantity_reserved"), 0),
+            )
+        )  # type: ignore
+        for reservation in quantity_reservation:
+            quantity_reservation_for_stocks[reservation["stock"]] += reservation[
+                "quantity_reserved"
+            ]
 
     quantity_allocation_list = list(
         Allocation.objects.filter(
