@@ -6328,8 +6328,8 @@ type Shop {
   defaultWeightUnit: WeightUnitsEnum
   translation(languageCode: LanguageCodeEnum!): ShopTranslation
   automaticFulfillmentDigitalProducts: Boolean
-  reserveStockDurationMinutesAnonymous: Int
-  reserveStockDurationMinutesAuthenticated: Int
+  reserveStockDurationAnonymousUser: Int
+  reserveStockDurationAuthenticatedUser: Int
   defaultDigitalMaxDownloads: Int
   defaultDigitalUrlValidDays: Int
   companyAddress: Address
@@ -6389,8 +6389,8 @@ input ShopSettingsInput {
   defaultMailSenderName: String
   defaultMailSenderAddress: String
   customerSetPasswordUrl: String
-  reserveStockDurationMinutesAnonymous: Int
-  reserveStockDurationMinutesAuthenticated: Int
+  reserveStockDurationAnonymousUser: Int
+  reserveStockDurationAuthenticatedUser: Int
 }
 
 type ShopSettingsTranslate {

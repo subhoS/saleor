@@ -66,7 +66,7 @@ def check_stock_quantity_bulk(
     quantities: Iterable[int],
     channel_slug: str,
     additional_filter_lookup: Optional[Dict[str, Any]] = None,
-    existing_lines: Iterable = None,
+    existing_lines: Iterable["CheckoutLineInfo"] = None,
     replace=False,
     check_reservations: bool = False,
 ):
@@ -90,7 +90,8 @@ def check_stock_quantity_bulk(
 
     if check_reservations:
         variant_reservations = get_reserved_quantity_bulk(
-            all_variants_stocks, existing_lines or []
+            all_variants_stocks,
+            [line.line for line in existing_lines] if existing_lines else [],
         )
     else:
         variant_reservations = defaultdict(int)
@@ -175,7 +176,7 @@ def get_reserved_quantity(
 
 def get_reserved_quantity_bulk(
     stocks: Iterable[Stock],
-    checkout_lines: Iterable["CheckoutLineInfo"],
+    checkout_lines: Iterable["CheckoutLine"],
 ) -> Dict[int, int]:
     reservations: Dict[int, int] = defaultdict(int)
     if not stocks:
@@ -186,7 +187,7 @@ def get_reserved_quantity_bulk(
             stock__in=stocks,
         )
         .not_expired()
-        .exclude_checkout_lines([line.line for line in checkout_lines])
+        .exclude_checkout_lines(checkout_lines)
         .values("stock_id")
         .annotate(
             quantity_reserved=Coalesce(Sum("quantity_reserved"), 0),
