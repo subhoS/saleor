@@ -9689,6 +9689,7 @@ def test_collections_query_with_sort(
         ({"search": "slug_"}, 3),
         ({"search": "Category1"}, 1),
         ({"search": "cat1"}, 2),
+        ({"search": "Description cat1."}, 1),
         ({"search": "Subcategory_description"}, 1),
         ({"ids": [to_global_id("Category", 2), to_global_id("Category", 3)]}, 2),
     ],
@@ -9705,12 +9706,14 @@ def test_categories_query_with_filter(
         name="Category1",
         slug="slug_category1",
         description=dummy_editorjs("Description cat1."),
+        description_plaintext="Description cat1.",
     )
     Category.objects.create(
         id=2,
         name="Category2",
         slug="slug_category2",
         description=dummy_editorjs("Description cat2."),
+        description_plaintext="Description cat2.",
     )
 
     Category.objects.create(
@@ -9719,6 +9722,7 @@ def test_categories_query_with_filter(
         slug="slug_subcategory",
         parent=Category.objects.get(name="Category1"),
         description=dummy_editorjs("Subcategory_description of cat1."),
+        description_plaintext="Subcategory_description of cat1.",
     )
     variables = {"filter": category_filter}
     staff_api_client.user.user_permissions.add(permission_manage_products)
